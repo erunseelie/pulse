@@ -1,0 +1,20 @@
+{
+    "coins-je": {
+        "id": 377056,
+        "name": "Coins JE",
+        "url": "https://www.curseforge.com/minecraft/mc-mods/coins-je",
+        "owner": "DarkhaxDev"
+    },
+    "spike-traps-fabric": {
+        "id": 377058,
+        "name": "Spike Traps Fabric",
+        "url": "https://www.curseforge.com/minecraft/mc-mods/spike-traps-fabric",
+        "owner": "tfarecnim"
+    },
+    "yugimod": {
+        "id": 377065,
+        "name": "YugiMod",
+        "url": "https://www.curseforge.com/minecraft/mc-mods/yugimod",
+        "owner": "kepert25"
+    }
+}
