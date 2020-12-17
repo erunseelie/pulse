@@ -1,10 +1,11 @@
+import json
 import re
-import requests
 import sys
 import zipfile
 from urllib.request import urlopen
+
+import requests
 from blessed import Terminal
-import json
 
 t = Terminal()
 
@@ -38,8 +39,7 @@ def pulseCF(url):
         print(url)
     data = json.loads(urlopen(url).read().decode("utf-8"))
     if (data.get("gameSlug") == "minecraft"):
-        # null-check.
-        if (data.get("categorySection")):
+        if (data.get("categorySection")):  # null-check.
             if (data.get("categorySection").get("path") == "mods"):
                 TRACKERS["mods_found"] += 1
                 return data
@@ -50,11 +50,14 @@ def pulseCF(url):
 def parseCF(data):
     """Parse a JSON object into usable data."""
 
-    print(data.get("id"))
-    print(data.get("name"))
-    print(data.get("authors")[0].get("name"))
-    print(data.get("websiteUrl"))
-    files = (data.get("gameVersionLatestFiles"))
+    mod = {
+        "id": data.get("id"),
+        "name": data.get("name"),
+        "owner": data.get("authors")[0].get("name"),
+        "url": data.get("websiteUrl"),
+        "files": data.get("gameVersionLatestFiles")
+    }
+    return mod
 
     # for file id 3112851, the DL link is
     # https://edge.forgecdn.net/files/3112/851/Coins-1.16.4-5.0.1.jar
@@ -67,22 +70,39 @@ def parseCF(data):
     # show date -> fileDate
 
 
+def parseRemoteFiles(mod):
+    """Get the latest file versions available for a given mod."""
+
+
 def populate():
-    start = 377056
-    for i in range(start, start+10):
-        data = pulseCF(URLS.get("CF_WATCHDOG") + str(i))
-        if data is not False:
-            parseCF(data)
-    total = t.yellow(str(TRACKERS["urls_scanned"] + TRACKERS["mods_found"]))
-    found = t.cyan(str(TRACKERS["mods_found"]))
-    print(t.bold("Scanned a total of " + total +
-                 " CurseForge projects and found " + found + " mods."))
+    """Method to populate the local file via defined search amount from the CurseForge watchdog.
+
+    Only call manually when necessary to update remote master dictionary file.
+    """
+    mods = {}
+    # TODO don't write over existing data.
+    with open('mods-cf.json', 'w') as file:
+        start = 377056
+        for i in range(start, start+10):
+            data = pulseCF(URLS.get("CF_WATCHDOG") + str(i))
+            if data is not False:
+                mod = parseCF(data)
+                mods.update({mod["id"]: mod["name"]})
+        total = t.yellow(
+            str(TRACKERS["urls_scanned"] + TRACKERS["mods_found"]))
+        found = t.cyan(str(TRACKERS["mods_found"]))
+        print(t.bold("Scanned a total of " + total +
+                     " CurseForge projects and found " + found + " mods."))
+        json.dump(mods, file, indent=4)
+        if DEBUG:
+            print(json.dumps(mods, indent=4))
+    print(t.bold(t.white_on_teal("Local file successfully updated.")))
 
 
 populate()
 
 
-def parseFiles():
+def parseLocalFiles():
 
     for filename in sys.argv[1:]:
         z = zipfile.ZipFile(open(filename, 'rb'))
